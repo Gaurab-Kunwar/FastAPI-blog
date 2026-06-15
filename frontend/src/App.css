@@ -1,0 +1,157 @@
+.app {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: left;        /* override the center from before */
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.logo {
+  font-family: 'Bangers', cursive;
+  font-size: 3.5rem;
+  letter-spacing: 2px;
+  color: #1a1a1a;
+  text-shadow: 3px 3px 0px #FFB347;
+}
+
+.tagline {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Feed */
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Card */
+.card {
+  background: #fff;
+  border: 3px solid #1a1a1a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 5px 5px 0px #1a1a1a;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0px #1a1a1a;
+}
+
+.card-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #1a1a1a;
+}
+
+.card-content {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.card-meta {
+  display: inline-block;
+  background: #B5C8FF;
+  border: 2px solid #1a1a1a;
+  border-radius: 20px;
+  padding: 0.2rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Status messages */
+.status {
+  text-align: center;
+  padding: 3rem;
+  font-size: 1.1rem;
+  color: #666;
+}
+
+.status.error {
+  color: #e74c3c;
+}
+
+.empty {
+  text-align: center;
+  padding: 3rem;
+  border: 3px dashed #ccc;
+  border-radius: 8px;
+  color: #999;
+}
+.single-post {
+  max-width: 100%;
+}
+
+.back-btn {
+  background: none;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.15s ease;
+}
+
+.back-btn:hover {
+  background: #FFB347;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.input {
+  padding: 0.6rem 1rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: box-shadow 0.15s ease;
+}
+
+.input:focus {
+  box-shadow: 3px 3px 0px #FFB347;
+}
+
+.btn {
+  padding: 0.6rem 1.5rem;
+  background: #FFB347;
+  border: 2px solid #1a1a1a;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 3px 3px 0px #1a1a1a;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0px #1a1a1a;
+}
