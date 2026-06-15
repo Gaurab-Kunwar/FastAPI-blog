@@ -13,43 +13,40 @@ function Home() {
         if (!res.ok) throw new Error('Failed to fetch')
         return res.json()
       })
-      .then(data => {
-        setPosts(data)
-        setLoading(false)
-      })
-      .catch(err => {
-        setError(err.message)
-        setLoading(false)
-      })
+      .then(data => { setPosts(data); setLoading(false) })
+      .catch(err => { setError(err.message); setLoading(false) })
   }, [])
 
   if (loading) return <div className="status">Loading posts...</div>
   if (error) return <div className="status error">Error: {error}</div>
 
   return (
-    <main className="feed">
-      {posts.length === 0 && (
-        <div className="empty">No posts yet. Write something!</div>
-      )}
-      {posts.map(post => (
-        <article
-          className="card"
-          key={post.id}
-          onClick={() => navigate(`/posts/${post.id}`)}
-          style={{ cursor: 'pointer' }}
-        >
-          <h2 className="card-title">{post.title}</h2>
-          <p className="card-content">{post.content}</p>
-          <div className="card-meta">
-            {new Date(post.created_at).toLocaleDateString('en-US', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric'
-            })}
+    <>
+      <div className="feed-header">
+        <h1>All Posts</h1>
+        <p>Thoughts, projects & midnight code</p>
+      </div>
+      <div className="feed">
+        {posts.length === 0 && (
+          <div className="empty-state">
+            <h3>No posts yet</h3>
+            <p>Write something!</p>
           </div>
-        </article>
-      ))}
-    </main>
+        )}
+        {posts.map(post => (
+          <article className="post-card" key={post.id} onClick={() => navigate(`/posts/${post.id}`)}>
+            <h2>{post.title}</h2>
+            <p className="post-excerpt">{post.content.slice(0, 120)}{post.content.length > 120 ? '...' : ''}</p>
+            <div className="post-meta">
+              {new Date(post.created_at).toLocaleDateString('en-US', {
+                year: 'numeric', month: 'short', day: 'numeric'
+              })}
+            </div>
+            <span className="read-more">Read more →</span>
+          </article>
+        ))}
+      </div>
+    </>
   )
 }
 

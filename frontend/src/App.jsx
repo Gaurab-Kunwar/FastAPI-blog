@@ -8,29 +8,20 @@ import './App.css'
 
 function Header({ isLoggedIn, onLogout }) {
   const navigate = useNavigate()
-
   return (
     <header className="header">
       <div>
-        <h1 className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-          unable-to-sleep
-        </h1>
+        <h1 className="logo" onClick={() => navigate('/')}>BLOG</h1>
         <p className="tagline">thoughts, projects & midnight code</p>
       </div>
       <div className="header-actions">
         {isLoggedIn ? (
           <>
-            <button className="btn" onClick={() => navigate('/create')}>
-              + New Post
-            </button>
-            <button className="back-btn" onClick={onLogout}>
-              Logout
-            </button>
+            <button className="btn" onClick={() => navigate('/create')}>+ New Post</button>
+            <button className="btn btn-danger" onClick={onLogout}>Logout</button>
           </>
         ) : (
-          <button className="back-btn" onClick={() => navigate('/login')}>
-            Login
-          </button>
+          <button className="btn" onClick={() => navigate('/login')}>Login</button>
         )}
       </div>
     </header>
@@ -47,8 +38,8 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="app">
-        <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <Header isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <div className="app-container">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/posts/:id" element={<Post />} />
