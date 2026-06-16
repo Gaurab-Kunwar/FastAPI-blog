@@ -7,6 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from auth import create_access_token, get_current_user
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 # Base.metadata.create_all(bind=engine)  # handled by Alembic
 
