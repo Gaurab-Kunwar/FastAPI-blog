@@ -1,83 +1,189 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import engine, get_db, Base
 from models import User, Post
 from schemas import UserCreate, UserResponse, PostCreate, PostResponse
 from werkzeug.security import generate_password_hash, check_password_hash
 from auth import create_access_token, get_current_user
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.middleware.cors import CORSMiddleware
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.post("/register", response_model=UserResponse)
+
+#
+
+
+@app.post(
+    "/register",
+    response_model=UserResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.username == user.username).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="Username already taken")
+    existing_user = db.query(User).filter(User.username == user.username).first()
 
-    hashed = generate_password_hash(user.password)
-    new_user = User(username=user.username, password=hashed)
+    if existing_user:
+        raise HTTPException(
+            status_code=400,
+            detail="Username already taken",
+        )
+
+    hashed_password = generate_password_hash(user.password)
+
+    new_user = User(
+        username=user.username,
+        password=hashed_password,
+    )
+
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
     return new_user
 
 
 @app.post("/login")
 def login(
-    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
 ):
     db_user = db.query(User).filter(User.username == form_data.username).first()
-    if not db_user or not check_password_hash(db_user.password, form_data.password):
-        raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    token = create_access_token({"sub": str(db_user.id)})
-    return {"access_token": token, "token_type": "bearer"}
+    if not db_user or not check_password_hash(
+        db_user.password,
+        form_data.password,
+    ):
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid credentials",
+        )
+
+    access_token = create_access_token({"sub": str(db_user.id)})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": db_user.id,
+            "username": db_user.username,
+        },
+    }
 
 
 @app.get("/posts", response_model=list[PostResponse])
-def get_posts(db: Session = Depends(get_db)):
-    return db.query(Post).order_by(Post.created_at.desc()).all()
+def get_posts(
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+):
+    return (
+        db.query(Post).order_by(Post.created_at.desc()).offset(skip).limit(limit).all()
+    )
 
 
 @app.get("/posts/{post_id}", response_model=PostResponse)
-def get_post(post_id: int, db: Session = Depends(get_db)):
-    post = db.query(Post).filter(Post.id == post_id).first()
+def get_post(
+    post_id: int,
+    db: Session = Depends(get_db),
+):
+    post = db.get(Post, post_id)
+
     if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Post not found",
+        )
+
     return post
 
 
-from models import User as UserModel
-
-
-@app.post("/posts", response_model=PostResponse)
+@app.post(
+    "/posts",
+    response_model=PostResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 def create_post(
     post: PostCreate,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    new_post = Post(title=post.title, content=post.content, user_id=current_user.id)
+    new_post = Post(
+        title=post.title,
+        content=post.content,
+        user_id=current_user.id,
+    )
+
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
+
     return new_post
+
+
+@app.put("/posts/{post_id}", response_model=PostResponse)
+def update_post(
+    post_id: int,
+    post_data: PostCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    post = db.get(Post, post_id)
+
+    if not post:
+        raise HTTPException(
+            status_code=404,
+            detail="Post not found",
+        )
+
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=403,
+            detail="Not your post",
+        )
+
+    post.title = post_data.title
+    post.content = post_data.content
+
+    db.commit()
+    db.refresh(post)
+
+    return post
 
 
 @app.delete("/posts/{post_id}")
 def delete_post(
     post_id: int,
     db: Session = Depends(get_db),
-    current_user: UserModel = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    post = db.query(Post).filter(Post.id == post_id).first()
+    post = db.get(Post, post_id)
+
     if not post:
-        raise HTTPException(status_code=404, detail="Post not found")
+        raise HTTPException(
+            status_code=404,
+            detail="Post not found",
+        )
+
     if post.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Not your post")
+        raise HTTPException(
+            status_code=403,
+            detail="Not your post",
+        )
+
     db.delete(post)
     db.commit()
-    return {"message": "Post deleted"}
+
+    return {"message": "Post deleted successfully"}
