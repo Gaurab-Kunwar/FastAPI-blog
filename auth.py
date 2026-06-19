@@ -6,6 +6,9 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import User
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 SECRET_KEY = os.environ.get("SECRET_KEY")
 ALGORITHM = "HS256"
